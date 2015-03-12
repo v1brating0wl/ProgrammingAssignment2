@@ -13,10 +13,28 @@
 
 
 #-----------------------------------------------------------------------------------#
-#  The function creates a special "matrix" object that can cache its inverse        #
+#  The function creates a matrix object that can cache its inverse. Appropriate     #
+#  attributes and methods are defined.                                              #
 #-----------------------------------------------------------------------------------#
 
 makeCacheMatrix <- function(x = matrix()) {
+    
+    inv <- NULL                                         # Set inverse to empty matrix
+    
+    set <- function(x) {                                # Create cache-able object
+        x <<- x                                         # Define matrix attribute
+        inv <<- NULL                                    # Define inverse attribute
+    }
+
+    
+    get <- function() x                                 # Define method which obtians the matrix
+
+    
+    setinverse <- function(solve) inv <<- solve         # Define method to compute the inverse
+    getinverse <- function() inv                        # Define method to retrieve cached inverse
+    list(set = set, get = get,                          # List of object methods
+         setinverse = setinverse,
+         getinverse = getinverse)
 
 }
 
@@ -28,5 +46,19 @@ makeCacheMatrix <- function(x = matrix()) {
 #-----------------------------------------------------------------------------------#
 
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+    inv <- x$getinverse()                               # Retrieve stored value of inverse
+    if(!is.null(inv)) {                                 # If the stored value is NOT an empty matrix:
+        message("Retrieving cached data...")            # display processing message
+        return(inv)                                     # return the stored inverse.
+    }else{                                              # Otherwise:
+        message("Computing inverse...")                 # display processing message
+        data <- x$get()                                 # retrieve the matrix
+        inv <- solve(data, ...)                         # invert the matrix
+        message("Caching result...")                    # display progress message
+        x$setinverse(inv)                               # set the inverse in cache
+        inv                                             # return the inverse
+    }   
 }
+
+
+#######################################################################################
